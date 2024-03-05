@@ -39,6 +39,8 @@ dependencies:
   provider: ^6.1.1
   firebase_auth: ^4.17.5
   http: ^1.2.0
+  flutter_datetime_picker: ^1.5.1
+  flutter_material_pickers: ^3.6.0
 
 dev_dependencies:
   flutter_test:

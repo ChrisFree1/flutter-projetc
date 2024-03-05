@@ -1,35 +1,13 @@
-import 'dart:convert';
-
+import 'services/books.service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:async';
 import 'Models/Books.dart';
 import 'pages/FormCreateBook.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
+
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final List<Books> book = [];
-
-  Future<List<Books>> getBooks() async {
-    var url = 'https://15sl3cj3-3000.use.devtunnels.ms/books/getAllBooks';
-    var response =
-        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 40));
-
-    if (response.statusCode == 200) {
-      var jsonString = response.body;
-      var jsonData = jsonDecode(jsonString);
-      List<Books> books = [];
-      jsonData.forEach((value) {
-        books.add(Books.fromJson(value));
-      });
-      return books;
-    } else {
-      throw Exception('Error al obtener los libros');
-    }
-  }
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,25 +20,39 @@ class MyApp extends StatelessWidget {
           title: const Text(appTitle),
         ),
         body: const MyCustomForm(),
-        floatingActionButton: FloatingActionButton(onPressed: (){
-          Navigator.push(context, 
-          MaterialPageRoute(builder: (context) =>const FormCreateBook())
-          );
-        },
-        child: const Icon (Icons.add        
-        ),)
+        floatingActionButton: Builder(
+          builder: (BuildContext context) {
+            return FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FormCreateBook()),
+                );
+              },
+              child: const Icon(Icons.add),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class MyCustomForm extends StatelessWidget {
-  const MyCustomForm({super.key});
+class MyCustomForm extends StatefulWidget {
+  const MyCustomForm({Key? key});
+
+  @override
+  _MyCustomFormState createState() => _MyCustomFormState();
+}
+
+class _MyCustomFormState extends State<MyCustomForm> {
+
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Books>>(
-      future: MyApp().getBooks(),
+      future: ServicesBooks().getBooks(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -107,7 +99,7 @@ class MyCustomForm extends StatelessWidget {
                         onPressed: () {
                           // Agrega aquí la lógica para eliminar el libro
                         },
-                        color:const Color.fromARGB(255, 243, 33, 33),
+                        color: const Color.fromARGB(255, 243, 33, 33),
                       ),
                     ],
                   ),
