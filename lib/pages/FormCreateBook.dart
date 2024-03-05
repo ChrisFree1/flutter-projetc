@@ -7,13 +7,13 @@ import '../services/books.service.dart';
 import '../Models/Books.dart';
 
 class FormCreateBook extends StatefulWidget {
+  final Books? bookToEdit;
 
-  const FormCreateBook({Key? key}) : super(key: key);
+  const FormCreateBook({super.key, this.bookToEdit});
 
   @override
   _FormCreateBookState createState() => _FormCreateBookState();
 }
-
 
 class _FormCreateBookState extends State<FormCreateBook> {
   void _selectDate(BuildContext context) {
@@ -24,6 +24,17 @@ class _FormCreateBookState extends State<FormCreateBook> {
       firstDate: DateTime(1600),
       lastDate: DateTime.now(),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.bookToEdit != null) {
+      _nombreLibroController.text = widget.bookToEdit!.nombre_libro ?? '';
+      _autorLibroController.text = widget.bookToEdit!.autor_libro ?? '';
+      _selectedDate =
+          DateTime.parse(widget.bookToEdit!.fecha_publicacion ?? '');
+    }
   }
 
   final _formState = GlobalKey<FormState>();
@@ -103,28 +114,56 @@ class _FormCreateBookState extends State<FormCreateBook> {
                     _nombreLibroController.text,
                     _selectedDate.toString(),
                   );
-                  _serviceBooks.createBook(newBook).then((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Libro Creado')),
-                    );
-                    // Limpiar los campos después de crear el libro
-                    _nombreLibroController.clear();
-                    _autorLibroController.clear();
-                    setState(() {
-                      _selectedDate = DateTime.now();
+                  if (widget.bookToEdit != null) {
+                    // Lógica para actualizar el libro
+                    _serviceBooks
+                        .updateBook(widget.bookToEdit!.id_libro!, newBook)
+                        .then((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Libro actualizado')),
+                      );
+                      // Restablecer el formulario
+                      _nombreLibroController.clear();
+                      _autorLibroController.clear();
+                      setState(() {
+                        _selectedDate = DateTime.now();
+                      });
+                    }).catchError((error) {
+                      // Mostrar un mensaje de error si falla la actualización del libro
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Error al actualizar el libro'),
+                          backgroundColor: Color.fromARGB(255, 43, 189, 182),
+                        ),
+                      );
                     });
-                  }).catchError((error) {
-                    // Mostrar un mensaje de error si falla la creación del libro
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Error al crear el libro'),
-                        backgroundColor: Color.fromARGB(255, 189, 43, 43),
-                      ),
-                    );
-                  });
+                  } else {
+                    // Lógica para crear un nuevo libro
+                    _serviceBooks.createBook(newBook).then((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Libro creado')),
+                      );
+                      // Restablecer el formulario
+                      _nombreLibroController.clear();
+                      _autorLibroController.clear();
+                      setState(() {
+                        _selectedDate = DateTime.now();
+                      });
+                    }).catchError((error) {
+                      // Mostrar un mensaje de error si falla la creación del libro
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Error al crear el libro'),
+                          backgroundColor: Color.fromARGB(255, 43, 189, 182),
+                        ),
+                      );
+                    });
+                  }
                 }
               },
-              child: const Text('Crear Libro'),
+              child: Text(widget.bookToEdit != null
+                  ? 'Actualizar Libro'
+                  : 'Crear Libro'),
             ),
           ],
         ),

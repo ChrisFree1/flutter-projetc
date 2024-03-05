@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -24,14 +26,55 @@ class ServicesBooks {
   }
 
   Future<void> createBook(Books book) async {
-    var url = 'https://15sl3cj3-3000.use.devtunnels.ms/books/createNewBooks';
-    var newBooks = book.toJson();
-    var response = await http.post(Uri.parse(url), body: newBooks);
+    try {
+      var url = 'https://15sl3cj3-3000.use.devtunnels.ms/books/createNewBooks';
+      var newBooks = book.toJson();
+      var response = await http.post(Uri.parse(url), body: newBooks);
 
-    if (response.statusCode == 201) {
-      print('Libro Creado Exitosamente');
-    } else {
-      throw Exception('Error al crear el libro');
+      if (response.statusCode == 201) {
+        print('Libro Creado Exitosamente');
+      } else {
+        throw Exception('Error al crear el libro');
+      }
+    } catch (error) {
+      print('Error al crear el libro: $error');
+    }
+  }
+
+  Future<void> deleteBook(String id_libro) async {
+    try {
+      var url =
+          'https://15sl3cj3-3000.use.devtunnels.ms/books/deleteBook/$id_libro';
+      var response = await http.delete(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        print('Libro Eliminado');
+      } else {
+        throw Exception(
+            'Error al eliminar el libro: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      // Manejar cualquier error que ocurra durante la solicitud
+      print('Error al eliminar el libro: $error');
+      // No necesitas lanzar otra excepción aquí, ya que ya has manejado el error
+    }
+  }
+
+  Future<void> updateBook(String idLibro, Books updatedBook) async {
+    try {
+      var url =
+          'https://15sl3cj3-3000.use.devtunnels.ms/books/updateBook/$idLibro';
+      var updatedBookJson = updatedBook.toJson();
+      var response = await http.put(Uri.parse(url), body: updatedBookJson);
+
+      if (response.statusCode == 200) {
+        print('Libro actualizado exitosamente');
+      } else {
+        throw Exception(
+            'Error al actualizar el libro: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Error al actualizar el libro: $error');
     }
   }
 }
