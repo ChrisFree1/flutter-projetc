@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const appTitle = 'Listado de Libros';
+    const appTitle = 'Prueba librar_books';
     return MaterialApp(
       theme: ThemeData.dark(),
       title: appTitle,
